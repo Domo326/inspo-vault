@@ -56,12 +56,14 @@ function InspoVaultApp() {
 
   // ── Auth state ────────────────────────────────────────────────────────────
   const [user,       setUser]       = useState(null);
-  const [authMode,   setAuthMode]   = useState('login');   // 'login' | 'signup'
-  const [authEmail,  setAuthEmail]  = useState('');
-  const [authPass,   setAuthPass]   = useState('');
-  const [authLoad,   setAuthLoad]   = useState(false);
-  const [authErr,    setAuthErr]    = useState('');
-  const [booting,    setBooting]    = useState(true);
+  const [authMode,    setAuthMode]    = useState('login');   // 'login' | 'signup'
+  const [authEmail,   setAuthEmail]   = useState('');
+  const [authPass,    setAuthPass]    = useState('');
+  const [authLoad,    setAuthLoad]    = useState(false);
+  const [authErr,     setAuthErr]     = useState('');
+  const [authSuccess, setAuthSuccess] = useState('');
+  const [showPass,    setShowPass]    = useState(false);
+  const [booting,     setBooting]     = useState(true);
 
   // ── Entries state ─────────────────────────────────────────────────────────
   const [entries,    setEntries]    = useState([]);
@@ -146,10 +148,17 @@ function InspoVaultApp() {
 
   // ── Auth handlers ─────────────────────────────────────────────────────────
   const handleAuth = async () => {
-    setAuthLoad(true); setAuthErr('');
+    setAuthLoad(true); setAuthErr(''); setAuthSuccess('');
     try {
-      if (authMode === 'login') await signIn(authEmail, authPass);
-      else await signUp(authEmail, authPass);
+      if (authMode === 'login') {
+        await signIn(authEmail, authPass);
+      } else {
+        await signUp(authEmail, authPass);
+        // If email confirmation is ON, no session fires — show a message
+        // If confirmation is OFF, onAuthStateChange fires and logs them in automatically
+        setAuthSuccess('✅ Account created! Check your email for a confirmation link, then come back and sign in. (If you turned off email confirmation in Supabase, you\'re already in!)');
+        setAuthMode('login');
+      }
     } catch (e) { setAuthErr(e.message); }
     finally { setAuthLoad(false); }
   };
@@ -327,9 +336,32 @@ function InspoVaultApp() {
           ))}
         </div>
 
-        <input className="inp" type="email"    placeholder="📧  Email"    value={authEmail} onChange={e => setAuthEmail(e.target.value)} />
-        <input className="inp" type="password" placeholder="🔒  Password" value={authPass}  onChange={e => setAuthPass(e.target.value)}  onKeyDown={e => e.key === 'Enter' && handleAuth()} />
-        {authErr && <p style={{ color:'#F87171', fontSize:13, padding:'8px 12px', background:'rgba(248,113,113,0.1)', borderRadius:8 }}>{authErr}</p>}
+        <input className="inp" type="email" placeholder="📧  Email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} />
+
+        {/* Password field with show/hide toggle */}
+        <div style={{ position:'relative' }}>
+          <input
+            className="inp"
+            type={showPass ? 'text' : 'password'}
+            placeholder="🔒  Password"
+            value={authPass}
+            onChange={e => setAuthPass(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAuth()}
+            style={{ paddingRight:48 }}
+          />
+          <button
+            className="btn"
+            onClick={() => setShowPass(p => !p)}
+            style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', background:'none', color:C.muted, fontSize:18, padding:0, lineHeight:1 }}
+            tabIndex={-1}
+            aria-label={showPass ? 'Hide password' : 'Show password'}
+          >
+            {showPass ? '🙈' : '👁️'}
+          </button>
+        </div>
+
+        {authErr     && <p style={{ color:'#F87171', fontSize:13, padding:'8px 12px', background:'rgba(248,113,113,0.1)', borderRadius:8 }}>{authErr}</p>}
+        {authSuccess && <p style={{ color:'#34D399', fontSize:13, padding:'10px 12px', background:'rgba(52,211,153,0.1)', borderRadius:8, lineHeight:1.5 }}>{authSuccess}</p>}
         <button className="btn btn-p" style={{ width:'100%', marginTop:4, background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={handleAuth} disabled={authLoad}>
           {authLoad ? 'One sec... ⏳' : authMode === 'login' ? 'Enter the Vault 🚀' : 'Create Account ✨'}
         </button>
