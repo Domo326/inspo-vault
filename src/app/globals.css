@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { background: #070910; color: #F1F5F9; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+/* ── Typography ─────────────────────────────────────────────────────────── */
+.sg  { font-family: 'Space Grotesk', sans-serif; }
+.mono{ font-family: 'JetBrains Mono', monospace; }
+
+/* ── Cards ──────────────────────────────────────────────────────────────── */
+.card {
+  background: #0D1018;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(129,140,248,0.2); }
+.card.extracted { border-color: rgba(167,139,250,0.2); }
+.card.extracted:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(167,139,250,0.35); }
+.card.suggested { border-color: rgba(45,212,191,0.2); }
+.card.suggested:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(45,212,191,0.35); }
+
+/* ── Tags ───────────────────────────────────────────────────────────────── */
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+.btn { border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500; transition: opacity .15s, transform .1s; }
+.btn:hover { opacity: .85; }
+.btn:active { transform: scale(.97); }
+.btn-p  { background: #818CF8; color: #fff; padding: 12px 24px; border-radius: 12px; font-size: 15px; }
+.btn-g  { background: #131722; color: #F1F5F9; border: 1px solid rgba(255,255,255,0.07); padding: 10px 20px; border-radius: 10px; font-size: 14px; }
+
+/* ── Inputs ─────────────────────────────────────────────────────────────── */
+.inp { width: 100%; background: #131722; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; color: #F1F5F9; font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 16px; outline: none; transition: border-color .2s; }
+.inp:focus { border-color: #818CF8; }
+.inp::placeholder { color: #475569; }
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+.iv   { min-height: 100vh; background: #070910; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+/* ── Scrollable rows ────────────────────────────────────────────────────── */
+.scrow { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.scrow::-webkit-scrollbar { display: none; }
+
+/* ── Filter / sort chips ────────────────────────────────────────────────── */
+.chip { flex-shrink: 0; padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid rgba(255,255,255,0.07); background: #131722; color: #94A3B8; transition: all .15s; font-family: 'Inter', sans-serif; white-space: nowrap; }
+.chip.on { background: #818CF8; color: #fff; border-color: #818CF8; }
+.sort-chip.on { background: rgba(129,140,248,0.15); color: #818CF8; border-color: rgba(129,140,248,0.35); }
+
+/* ── Add modal tabs ─────────────────────────────────────────────────────── */
+.tab { flex: 1; padding: 11px; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: all .2s; }
+.tab.on  { background: #818CF8; color: #fff; }
+.tab.off { background: transparent; color: #94A3B8; }
+
+/* ── Modal overlay & panel ──────────────────────────────────────────────── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(6px); z-index: 50; display: flex; align-items: flex-end; }
+.panel   { width: 100%; max-height: 92vh; background: #0D1018; border-radius: 24px 24px 0 0; border-top: 1px solid rgba(255,255,255,0.08); overflow-y: auto; }
+
+/* ── Chat bubbles ───────────────────────────────────────────────────────── */
+.bu { color: #fff; border-radius: 16px 16px 4px 16px; padding: 12px 16px; max-width: 80%; align-self: flex-end; font-size: 14px; line-height: 1.5; background: #818CF8; }
+.ba { background: #131722; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px 16px 16px 4px; padding: 12px 16px; max-width: 88%; align-self: flex-start; font-size: 14px; line-height: 1.6; }
+.ba strong { color: #818CF8; }
+
+/* ── Stat pills ─────────────────────────────────────────────────────────── */
+.stat-pill       { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; background: rgba(251,191,36,0.1); color: #FBBF24; border: 1px solid rgba(251,191,36,0.2); }
+.stat-pill.forks { background: rgba(52,211,153,0.1); color: #34D399; border-color: rgba(52,211,153,0.2); }
+
+/* ── Prompt box ─────────────────────────────────────────────────────────── */
+.prompt-box     { background: rgba(167,139,250,0.07); border: 1px solid rgba(167,139,250,0.2); border-radius: 12px; padding: 14px 16px; }
+.prompt-box.sug { background: rgba(45,212,191,0.07); border-color: rgba(45,212,191,0.2); }
+
+/* ── Drop zone ──────────────────────────────────────────────────────────── */
+.drop-zone       { border: 2px dashed rgba(167,139,250,0.3); border-radius: 14px; padding: 32px 20px; text-align: center; cursor: pointer; transition: all .2s; background: rgba(167,139,250,0.04); }
+.drop-zone:hover, .drop-zone.drag { border-color: rgba(167,139,250,0.6); background: rgba(167,139,250,0.1); }
+
+/* ── Shimmer skeleton ───────────────────────────────────────────────────── */
+.shimmer { background: linear-gradient(90deg,#131722 0%,#1A2033 50%,#131722 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 10px; }
+
+/* ── Animations ─────────────────────────────────────────────────────────── */
+@keyframes shimmer  { 0%{background-position:-200% 0}100%{background-position:200% 0} }
+@keyframes slideUp  { from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1} }
+@keyframes fadeIn   { from{opacity:0}to{opacity:1} }
+@keyframes pulse    { 0%,100%{opacity:.3}50%{opacity:1} }
+@keyframes spin     { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }
+
+.slide-up { animation: slideUp .3s ease; }
+.fade-in  { animation: fadeIn .25s ease; }
+.spin     { animation: spin 1s linear infinite; }
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-thumb { background: #1A2033; border-radius: 4px; }
