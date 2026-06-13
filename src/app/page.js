@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  supabase, signIn, signUp, signOut, fetchEntries, insertEntry, incrementOpens, deleteEntry
+  supabase, signIn, signUp, signOut, fetchEntries, insertEntry, incrementOpens, deleteEntry, updateEntry
 } from '@/lib/supabase';
 import {
   C, PROMPT_STYLES, SOURCES, GRADIENTS, SORT_OPTIONS, ALL_FILTERS,
@@ -78,6 +78,9 @@ function InspoVaultApp() {
   const [showDetail, setShowDetail] = useState(false);
   const [showChat,   setShowChat]   = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [showEdit,   setShowEdit]   = useState(false);
+  const [editData,   setEditData]   = useState(null);
+  const [editLoad,   setEditLoad]   = useState(false);
   const [copied,     setCopied]     = useState(false);
 
   // ── URL-add state ─────────────────────────────────────────────────────────
@@ -174,6 +177,7 @@ function InspoVaultApp() {
       const data = await res.json();
       setUrlMeta(data);
       setAddTitle(data.title || '');
+      if (data.suggested_tags?.length) setAddTags(data.suggested_tags.join(', '));
     } catch (e) { console.error(e); }
     finally { setFetching(false); }
   };
@@ -321,6 +325,38 @@ function InspoVaultApp() {
       setEntries(p => [entry, ...p]);
       alert(`✅ "${repo.name}" saved to your vault!`);
     } catch (e) { alert(`Error saving: ${e.message}`); }
+  };
+
+  const openEdit = (entry) => {
+    setEditData({
+      id:          entry.id,
+      title:       entry.title       || '',
+      description: entry.description || '',
+      notes:       entry.notes       || '',
+      tags:        entry.tags?.join(', ') || '',
+      url:         entry.url         || '',
+    });
+    setShowDetail(false);
+    setShowEdit(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!editData) return;
+    setEditLoad(true);
+    try {
+      const updated = await updateEntry(editData.id, {
+        title:       editData.title,
+        description: editData.description,
+        notes:       editData.notes,
+        tags:        editData.tags.split(',').map(t => t.trim()).filter(Boolean),
+        url:         editData.url,
+      });
+      setEntries(p => p.map(x => x.id === updated.id ? updated : x));
+      setSelected(updated);
+      setShowEdit(false);
+      setShowDetail(true);
+    } catch (e) { alert(`Save failed: ${e.message}`); }
+    finally { setEditLoad(false); }
   };
 
   // ── Filter + sort ─────────────────────────────────────────────────────────
@@ -721,9 +757,14 @@ function InspoVaultApp() {
               <h2 className="sg" style={{ fontSize:21, fontWeight:700, marginBottom:10, lineHeight:1.3 }}>{selected.title}</h2>
               <p style={{ color:C.sub, fontSize:14, lineHeight:1.6, marginBottom:16 }}>{selected.description}</p>
               {selected.url && (
-                <div style={{ padding:'10px 14px', background:C.s2, borderRadius:10, border:`1px solid ${C.border}`, marginBottom:16 }}>
-                  <p style={{ color:C.muted, fontSize:12, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>🔗 {selected.url}</p>
-                </div>
+                <a
+                  href={selected.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display:'block', padding:'10px 14px', background:C.s2, borderRadius:10, border:`1px solid ${C.border}`, marginBottom:16, textDecoration:'none' }}
+                >
+                  <p style={{ color:C.accent, fontSize:12, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>🔗 {selected.url}</p>
+                </a>
               )}
               {selected.tags?.length > 0 && (
                 <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
@@ -804,14 +845,104 @@ function InspoVaultApp() {
                 </div>
               )}
 
-              <div style={{ display:'flex', gap:10, marginBottom:12 }}>
+              <div style={{ display:'flex', gap:10, marginBottom:10 }}>
                 <button className="btn btn-g" style={{ flex:1 }} onClick={() => shareEntry(selected)}>📤 Share</button>
-                <button className="btn btn-p" style={{ flex:2, background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={() => openChat(selected)}>
+                <button className="btn btn-g" style={{ flex:1 }} onClick={() => openEdit(selected)}>✏️ Edit</button>
+              </div>
+              <div style={{ display:'flex', gap:10, marginBottom:12 }}>
+                <button className="btn btn-p" style={{ flex:1, background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={() => openChat(selected)}>
                   💬 {selected.prompt_text ? 'Chat & Use Prompt' : 'Chat About This'}
                 </button>
               </div>
               <button className="btn btn-g" style={{ width:'100%', color:'#F87171', borderColor:'rgba(248,113,113,0.2)' }} onClick={() => handleDelete(selected)}>
                 🗑️ Delete entry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ EDIT MODAL ═════════════════════════════════════════════════════ */}
+      {showEdit && editData && (
+        <div className="overlay fade-in" onClick={e => e.target===e.currentTarget && setShowEdit(false)}>
+          <div className="panel slide-up" style={{ padding:'0 20px 36px' }}>
+            <div style={{ width:40, height:4, background:C.s3, borderRadius:2, margin:'16px auto 20px' }} />
+            <h2 className="sg" style={{ fontSize:22, fontWeight:700, marginBottom:20 }}>Edit Entry ✏️</h2>
+
+            {/* Title */}
+            <div style={{ marginBottom:12 }}>
+              <p style={{ fontSize:12, color:C.muted, marginBottom:6, fontWeight:500 }}>TITLE</p>
+              <input
+                className="inp"
+                value={editData.title}
+                onChange={e => setEditData(p => ({ ...p, title: e.target.value }))}
+                placeholder="Give it a descriptive title..."
+              />
+            </div>
+
+            {/* URL */}
+            {editData.url && (
+              <div style={{ marginBottom:12 }}>
+                <p style={{ fontSize:12, color:C.muted, marginBottom:6, fontWeight:500 }}>URL</p>
+                <input
+                  className="inp"
+                  value={editData.url}
+                  onChange={e => setEditData(p => ({ ...p, url: e.target.value }))}
+                  placeholder="https://..."
+                  style={{ fontSize:13 }}
+                />
+              </div>
+            )}
+
+            {/* Description */}
+            <div style={{ marginBottom:12 }}>
+              <p style={{ fontSize:12, color:C.muted, marginBottom:6, fontWeight:500 }}>DESCRIPTION</p>
+              <textarea
+                className="inp"
+                value={editData.description}
+                onChange={e => setEditData(p => ({ ...p, description: e.target.value }))}
+                placeholder="What is this about..."
+                rows={3}
+                style={{ resize:'none' }}
+              />
+            </div>
+
+            {/* Tags */}
+            <div style={{ marginBottom:12 }}>
+              <p style={{ fontSize:12, color:C.muted, marginBottom:6, fontWeight:500 }}>TAGS</p>
+              <input
+                className="inp"
+                value={editData.tags}
+                onChange={e => setEditData(p => ({ ...p, tags: e.target.value }))}
+                placeholder="ai, tools, gamedev, design..."
+              />
+              {/* Tag preview */}
+              {editData.tags && (
+                <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginTop:8 }}>
+                  {editData.tags.split(',').map(t => t.trim()).filter(Boolean).map(t => (
+                    <span key={t} style={{ fontSize:12, color:C.sub, background:C.s2, padding:'3px 10px', borderRadius:20, border:`1px solid ${C.border}` }}>#{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Notes */}
+            <div style={{ marginBottom:20 }}>
+              <p style={{ fontSize:12, color:C.muted, marginBottom:6, fontWeight:500 }}>YOUR NOTES</p>
+              <textarea
+                className="inp"
+                value={editData.notes}
+                onChange={e => setEditData(p => ({ ...p, notes: e.target.value }))}
+                placeholder="Add your personal notes, ideas, or reminders..."
+                rows={3}
+                style={{ resize:'none' }}
+              />
+            </div>
+
+            <div style={{ display:'flex', gap:10 }}>
+              <button className="btn btn-g" style={{ flex:1 }} onClick={() => { setShowEdit(false); setShowDetail(true); }}>Cancel</button>
+              <button className="btn btn-p" style={{ flex:2, background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={handleEditSave} disabled={editLoad}>
+                {editLoad ? 'Saving... ⏳' : 'Save Changes 💾'}
               </button>
             </div>
           </div>

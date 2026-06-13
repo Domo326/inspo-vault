@@ -75,9 +75,34 @@ export async function POST(req) {
     const description = parseOG(html, 'description') || parseOG(html, 'desc') || '';
     const image_url   = parseOG(html, 'image') || null;
 
-    return NextResponse.json({ source_type: source, title, description, image_url, stars: null, forks: null });
+    return NextResponse.json({ source_type: source, title, description, image_url, stars: null, forks: null, suggested_tags: await suggestTags(source, title, description) });
 
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
+}
+
+async function suggestTags(source, title, description) {
+  // Simple keyword-based tag generation — no extra API call needed
+  const text = (title + ' ' + description).toLowerCase();
+  const tags = [source];
+  const checks = {
+    'ai':         ['ai', 'gpt', 'llm', 'claude', 'gemini', 'machine learning', 'neural', 'stable diffusion', 'midjourney'],
+    'python':     ['python', 'pip', 'django', 'flask', 'pytorch', 'tensorflow'],
+    'javascript': ['javascript', 'typescript', 'react', 'next.js', 'vue', 'node', 'npm'],
+    'automation': ['automation', 'workflow', 'make.com', 'n8n', 'zapier', 'automate'],
+    'tools':      ['tool', 'cli', 'utility', 'productivity', 'extension', 'plugin'],
+    'gamedev':    ['game', 'unity', 'unreal', 'godot', 'shader', 'indie'],
+    '3d':         ['3d', 'blender', 'print', 'model', 'render', 'cad'],
+    'web':        ['website', 'frontend', 'backend', 'api', 'saas', 'pwa'],
+    'design':     ['design', 'figma', 'ui', 'ux', 'css', 'tailwind'],
+    'open-source':['open source', 'github', 'repository', 'fork', 'star'],
+    'tutorial':   ['tutorial', 'how to', 'guide', 'learn', 'course', 'walkthrough'],
+    'business':   ['business', 'startup', 'monetize', 'revenue', 'saas', 'ecommerce'],
+    'content':    ['content', 'video', 'reel', 'post', 'creator', 'viral'],
+  };
+  for (const [tag, keywords] of Object.entries(checks)) {
+    if (keywords.some(k => text.includes(k))) tags.push(tag);
+  }
+  return [...new Set(tags)].slice(0, 6);
 }

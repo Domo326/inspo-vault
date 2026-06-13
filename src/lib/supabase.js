@@ -64,6 +64,17 @@ export async function incrementOpens(id) {
   }
 }
 
+export async function updateEntry(id, updates) {
+  const { data, error } = await supabase
+    .from('entries')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function deleteEntry(id) {
   const { error } = await supabase.from('entries').delete().eq('id', id);
   if (error) throw error;
