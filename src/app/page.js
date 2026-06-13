@@ -168,7 +168,9 @@ function InspoVaultApp() {
     if (!addUrl.trim()) return;
     setFetching(true); setUrlMeta(null);
     try {
-      const res  = await fetch('/api/fetch-meta', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url: addUrl }) });
+      const isYouTube = addUrl.includes('youtube.com') || addUrl.includes('youtu.be');
+      const endpoint  = isYouTube ? '/api/youtube-meta' : '/api/fetch-meta';
+      const res  = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url: addUrl }) });
       const data = await res.json();
       setUrlMeta(data);
       setAddTitle(data.title || '');
@@ -186,6 +188,7 @@ function InspoVaultApp() {
         tags: addTags.split(',').map(t => t.trim()).filter(Boolean),
         notes: addNotes, prompt_text: null, prompt_tool: null, prompt_type: null,
         stars: urlMeta.stars ?? null, forks: urlMeta.forks ?? null, opens: 0,
+        extracted_repos: urlMeta.extracted_repos || [],
       });
       setEntries(p => [entry, ...p]);
       closeAdd();
@@ -297,6 +300,27 @@ function InspoVaultApp() {
     await deleteEntry(entry.id).catch(() => {});
     setEntries(p => p.filter(x => x.id !== entry.id));
     setShowDetail(false);
+  };
+
+  const handleSaveRepo = async (repo) => {
+    try {
+      const entry = await insertEntry({
+        url:         repo.url,
+        title:       repo.name || repo.full_name || repo.url,
+        description: repo.context || repo.gh_desc || 'GitHub repository',
+        image_url:   null,
+        source_type: 'github',
+        tags:        ['github', repo.language?.toLowerCase()].filter(Boolean),
+        notes:       '',
+        prompt_text: null, prompt_tool: null, prompt_type: null,
+        stars:       repo.stars ?? null,
+        forks:       repo.forks ?? null,
+        opens:       0,
+        extracted_repos: [],
+      });
+      setEntries(p => [entry, ...p]);
+      alert(`✅ "${repo.name}" saved to your vault!`);
+    } catch (e) { alert(`Error saving: ${e.message}`); }
   };
 
   // ── Filter + sort ─────────────────────────────────────────────────────────
@@ -488,7 +512,12 @@ function InspoVaultApp() {
                           <span key={t} style={{ fontSize:11, color:C.muted, background:C.s2, padding:'2px 8px', borderRadius:20, border:`1px solid ${C.border}` }}>#{t}</span>
                         ))}
                       </div>
-                      <span style={{ color:C.muted, fontSize:12 }}>{timeAgo(entry.created_at)}</span>
+                      <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                        {entry.extracted_repos?.length > 0 && (
+                          <span style={{ fontSize:11, color:'#F87171', fontWeight:600 }}>📦 {entry.extracted_repos.length} repo{entry.extracted_repos.length > 1 ? 's' : ''}</span>
+                        )}
+                        <span style={{ color:C.muted, fontSize:12 }}>{timeAgo(entry.created_at)}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -539,6 +568,11 @@ function InspoVaultApp() {
                 {addUrl.includes('github.com') && (
                   <p style={{ fontSize:12, color:C.accent, marginBottom:12, padding:'8px 12px', background:'rgba(129,140,248,0.08)', borderRadius:8, border:'1px solid rgba(129,140,248,0.2)' }}>
                     🐙 GitHub detected — will pull ⭐ stars and 🍴 forks from the API!
+                  </p>
+                )}
+                {(addUrl.includes('youtube.com') || addUrl.includes('youtu.be')) && (
+                  <p style={{ fontSize:12, color:'#F87171', marginBottom:12, padding:'8px 12px', background:'rgba(248,113,113,0.08)', borderRadius:8, border:'1px solid rgba(248,113,113,0.2)' }}>
+                    📺 YouTube detected — will summarize the video and extract every GitHub repo mentioned!
                   </p>
                 )}
                 {fetching && (
@@ -704,6 +738,71 @@ function InspoVaultApp() {
               )}
 
               <PromptBox entry={selected} expanded={showPrompt} onToggle={() => setShowPrompt(p => !p)} onCopy={copyPrompt} copied={copied} />
+
+              {/* ── Extracted repos from YouTube video ── */}
+              {selected.extracted_repos?.length > 0 && (
+                <div style={{ marginBottom:16 }}>
+                  <p style={{ fontSize:12, color:'#F87171', fontWeight:700, marginBottom:12 }}>
+                    📦 REPOS MENTIONED IN THIS VIDEO ({selected.extracted_repos.length})
+                  </p>
+                  <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                    {selected.extracted_repos.map((repo, i) => (
+                      <div key={i} style={{ background:C.s2, border:`1px solid ${repo.verified ? 'rgba(129,140,248,0.2)' : 'rgba(251,191,36,0.2)'}`, borderRadius:12, padding:'12px 14px' }}>
+                        {/* Repo header */}
+                        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8, marginBottom:6 }}>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+                              <span style={{ fontSize:14, fontWeight:600, fontFamily:"'Space Grotesk',sans-serif", color:C.text }}>
+                                🐙 {repo.full_name || repo.name}
+                              </span>
+                              {!repo.verified && (
+                                <span style={{ fontSize:10, color:'#FBBF24', background:'rgba(251,191,36,0.1)', border:'1px solid rgba(251,191,36,0.25)', padding:'2px 7px', borderRadius:20, fontWeight:600 }}>
+                                  ⚠️ UNVERIFIED
+                                </span>
+                              )}
+                            </div>
+                            {/* Stars + forks */}
+                            {repo.stars != null && (
+                              <div style={{ display:'flex', gap:10, marginTop:4 }}>
+                                <span style={{ fontSize:12, color:'#FBBF24' }}>⭐ {repo.stars?.toLocaleString()}</span>
+                                <span style={{ fontSize:12, color:C.green }}>🍴 {repo.forks?.toLocaleString()}</span>
+                                {repo.language && <span style={{ fontSize:12, color:C.muted }}>{repo.language}</span>}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* What the video says about it */}
+                        {repo.context && (
+                          <p style={{ fontSize:13, color:C.sub, lineHeight:1.5, marginBottom:10 }}>{repo.context}</p>
+                        )}
+                        {!repo.context && repo.gh_desc && (
+                          <p style={{ fontSize:13, color:C.sub, lineHeight:1.5, marginBottom:10 }}>{repo.gh_desc}</p>
+                        )}
+
+                        {/* Actions */}
+                        <div style={{ display:'flex', gap:8 }}>
+                          <a
+                            href={repo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ flex:1, textAlign:'center', padding:'8px', borderRadius:8, background:'rgba(129,140,248,0.12)', color:C.accent, border:'1px solid rgba(129,140,248,0.25)', fontSize:13, fontWeight:500, textDecoration:'none', cursor:'pointer' }}
+                          >
+                            Open Repo 🔗
+                          </a>
+                          <button
+                            className="btn"
+                            style={{ flex:1, padding:'8px', borderRadius:8, background:'rgba(52,211,153,0.1)', color:C.green, border:'1px solid rgba(52,211,153,0.25)', fontSize:13 }}
+                            onClick={() => handleSaveRepo(repo)}
+                          >
+                            Save to Vault 💾
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div style={{ display:'flex', gap:10, marginBottom:12 }}>
                 <button className="btn btn-g" style={{ flex:1 }} onClick={() => shareEntry(selected)}>📤 Share</button>
