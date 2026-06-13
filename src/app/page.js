@@ -10,6 +10,27 @@ import {
   timeAgo, fmtNum, sortEntries, detectSource,
 } from '@/lib/constants';
 
+// ─── Brand Logo ────────────────────────────────────────────────────────────
+function Logo({ size = 36 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Outer dashed orbit ring — Signal Orange */}
+      <circle cx="20" cy="20" r="18.5" stroke="#E67A2E" strokeWidth="1.2" strokeDasharray="3.5 3" opacity="0.7"/>
+      {/* Inner filled circle — Deep Space Blue */}
+      <circle cx="20" cy="20" r="12" fill="#001B87" fillOpacity="0.5"/>
+      {/* Inner ring — Electric Blue */}
+      <circle cx="20" cy="20" r="12" stroke="#0046FF" strokeWidth="1.5"/>
+      {/* IV monogram */}
+      <text x="20" y="24.5" textAnchor="middle" fill="#FFFFFF" fontSize="9.5" fontWeight="700"
+        fontFamily="'Space Grotesk', sans-serif" letterSpacing="1">IV</text>
+      {/* Orange orbit dot */}
+      <circle cx="38.5" cy="20" r="2.8" fill="#E67A2E"/>
+      {/* Dim dot opposite */}
+      <circle cx="1.5" cy="20" r="1.5" fill="#0046FF" opacity="0.5"/>
+    </svg>
+  );
+}
+
 // ─── Sub-components ────────────────────────────────────────────────────────
 
 function PromptBadge({ type, small = false }) {
@@ -377,59 +398,49 @@ function InspoVaultApp() {
 
   // ─── AUTH ──────────────────────────────────────────────────────────────────
   if (!user) return (
-    <div className="iv" style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', padding:24 }}>
-      <div style={{ textAlign:'center', marginBottom:48 }} className="fade-in">
-        <div style={{ fontSize:72, marginBottom:12, filter:'drop-shadow(0 0 30px rgba(129,140,248,0.5))' }}>🗂️</div>
-        <h1 className="sg" style={{ fontSize:40, fontWeight:700, letterSpacing:-1 }}>
-          Inspo<span style={{ color:C.accent }}>Vault</span>
+    <div className="iv" style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', padding:24, position:'relative', overflow:'hidden' }}>
+      <div style={{ position:'absolute', top:'20%', left:'50%', transform:'translateX(-50%)', width:500, height:500, background:'radial-gradient(circle, rgba(0,70,255,0.07) 0%, transparent 70%)', pointerEvents:'none' }}/>
+      <div style={{ position:'absolute', bottom:'15%', right:'5%', width:250, height:250, background:'radial-gradient(circle, rgba(230,122,46,0.05) 0%, transparent 70%)', pointerEvents:'none' }}/>
+
+      <div style={{ textAlign:'center', marginBottom:44 }} className="fade-in">
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:20, filter:'drop-shadow(0 0 24px rgba(0,70,255,0.35))' }}>
+          <Logo size={72}/>
+        </div>
+        <h1 className="sg" style={{ fontSize:42, fontWeight:700, letterSpacing:-1, lineHeight:1 }}>
+          Inspo<span style={{ color:'#E67A2E' }}>Vault</span>
         </h1>
-        <p style={{ color:C.sub, marginTop:8, fontSize:15 }}>Your personal inspiration HQ ✨</p>
+        <p style={{ color:'#A8A8A8', marginTop:10, fontSize:12, letterSpacing:3, textTransform:'uppercase', fontFamily:"'Space Grotesk',sans-serif" }}>Signal Archive</p>
+        <p style={{ color:'#4A5A7A', marginTop:6, fontSize:13 }}>Log every signal. Miss nothing.</p>
       </div>
 
       <div className="slide-up" style={{ width:'100%', maxWidth:360, display:'flex', flexDirection:'column', gap:12 }}>
-        {/* Auth mode toggle */}
-        <div style={{ display:'flex', gap:8, background:C.s2, padding:4, borderRadius:12, marginBottom:4 }}>
+        <div style={{ display:'flex', gap:6, background:'#0C1220', padding:4, borderRadius:12, marginBottom:4, border:'1px solid rgba(0,70,255,0.2)' }}>
           {['login','signup'].map(m => (
-            <button key={m} className={`tab ${authMode===m?'on':'off'}`} onClick={() => { setAuthMode(m); setAuthErr(''); }}>
+            <button key={m} className={`auth-tab ${authMode===m?'on':'off'}`} onClick={() => { setAuthMode(m); setAuthErr(''); setAuthSuccess(''); }}>
               {m === 'login' ? '🔑 Sign In' : '✨ Sign Up'}
             </button>
           ))}
         </div>
-
         <input className="inp" type="email" placeholder="📧  Email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} />
-
-        {/* Password field with show/hide toggle */}
         <div style={{ position:'relative' }}>
-          <input
-            className="inp"
-            type={showPass ? 'text' : 'password'}
-            placeholder="🔒  Password"
-            value={authPass}
-            onChange={e => setAuthPass(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleAuth()}
-            style={{ paddingRight:48 }}
-          />
-          <button
-            className="btn"
-            onClick={() => setShowPass(p => !p)}
-            style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', background:'none', color:C.muted, fontSize:18, padding:0, lineHeight:1 }}
-            tabIndex={-1}
-            aria-label={showPass ? 'Hide password' : 'Show password'}
-          >
-            {showPass ? '🙈' : '👁️'}
-          </button>
+          <input className="inp" type={showPass?'text':'password'} placeholder="🔒  Password" value={authPass}
+            onChange={e => setAuthPass(e.target.value)} onKeyDown={e => e.key==='Enter'&&handleAuth()} style={{ paddingRight:48 }}/>
+          <button className="btn" onClick={() => setShowPass(p=>!p)}
+            style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', background:'none', color:'#4A5A7A', fontSize:18, padding:0 }}
+            tabIndex={-1}>{showPass?'🙈':'👁️'}</button>
         </div>
-
-        {authErr     && <p style={{ color:'#F87171', fontSize:13, padding:'8px 12px', background:'rgba(248,113,113,0.1)', borderRadius:8 }}>{authErr}</p>}
-        {authSuccess && <p style={{ color:'#34D399', fontSize:13, padding:'10px 12px', background:'rgba(52,211,153,0.1)', borderRadius:8, lineHeight:1.5 }}>{authSuccess}</p>}
-        <button className="btn btn-p" style={{ width:'100%', marginTop:4, background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={handleAuth} disabled={authLoad}>
-          {authLoad ? 'One sec... ⏳' : authMode === 'login' ? 'Enter the Vault 🚀' : 'Create Account ✨'}
+        {authErr     && <p style={{ color:'#FF4444', fontSize:13, padding:'8px 12px', background:'rgba(255,68,68,0.08)', borderRadius:8, border:'1px solid rgba(255,68,68,0.2)' }}>{authErr}</p>}
+        {authSuccess && <p style={{ color:'#E67A2E', fontSize:13, padding:'10px 12px', background:'rgba(230,122,46,0.08)', borderRadius:8, border:'1px solid rgba(230,122,46,0.25)', lineHeight:1.5 }}>{authSuccess}</p>}
+        <button className="btn btn-p" style={{ width:'100%', marginTop:4 }} onClick={handleAuth} disabled={authLoad}>
+          {authLoad ? 'One sec... ⏳' : authMode==='login' ? 'Enter the Vault 🚀' : 'Create Account ✨'}
         </button>
       </div>
 
-      <p style={{ position:'absolute', bottom:24, color:C.muted, fontSize:12, textAlign:'center' }}>
-        🐙 GitHub · 📸 Instagram · 🐦 X · 📺 YouTube · 🌐 Web
-      </p>
+      <div style={{ position:'absolute', bottom:28, display:'flex', gap:16, flexWrap:'wrap', justifyContent:'center' }}>
+        {['🐙 GitHub','📸 Instagram','🐦 X','📺 YouTube','🌐 Web','📷 Screenshots'].map(s => (
+          <span key={s} style={{ fontSize:11, color:'#4A5A7A' }}>{s}</span>
+        ))}
+      </div>
     </div>
   );
 
@@ -440,19 +451,24 @@ function InspoVaultApp() {
 
         {/* Header */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'22px 0 20px' }}>
-          <div>
-            <h1 className="sg" style={{ fontSize:28, fontWeight:700 }}>Inspo<span style={{ color:C.accent }}>Vault</span> 🗂️</h1>
-            <div style={{ display:'flex', gap:12, marginTop:4, flexWrap:'wrap' }}>
-              <p style={{ color:C.muted, fontSize:13 }}>{entries.length} items</p>
-              {extractedCount > 0 && <p style={{ color:C.purple, fontSize:13 }}>🧠 {extractedCount} extracted</p>}
-              {suggestedCount > 0 && <p style={{ color:C.teal,   fontSize:13 }}>✨ {suggestedCount} suggested</p>}
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <Logo size={40}/>
+            <div>
+              <h1 className="sg" style={{ fontSize:24, fontWeight:700, letterSpacing:-0.5, lineHeight:1 }}>
+                Inspo<span style={{ color:'#E67A2E' }}>Vault</span>
+              </h1>
+              <p style={{ color:'#4A5A7A', fontSize:10, letterSpacing:2.5, textTransform:'uppercase', fontFamily:"'Space Grotesk',sans-serif", marginTop:3 }}>Signal Archive</p>
             </div>
           </div>
-          <button className="btn" onClick={() => { signOut(); setEntries([]); }}
-            style={{ width:38, height:38, borderRadius:'50%', background:`linear-gradient(135deg,${C.accent},${C.cyan})`, color:'#fff', fontSize:15, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Space Grotesk',sans-serif", fontWeight:700 }}
-            title="Sign out">
-            N
-          </button>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <div style={{ textAlign:'right' }}>
+              <p style={{ color:'#A8A8A8', fontSize:12 }}>{entries.length} signals</p>
+              {promptCount > 0 && <p style={{ color:'#E67A2E', fontSize:11 }}>🧠 {promptCount} prompts</p>}
+            </div>
+            <button className="btn" onClick={() => { signOut(); setEntries([]); }}
+              style={{ width:38, height:38, borderRadius:'50%', background:'linear-gradient(135deg,#001B87,#0046FF)', color:'#fff', fontSize:13, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Space Grotesk',sans-serif", fontWeight:700, border:'1px solid rgba(0,70,255,0.3)' }}
+              title="Sign out">N</button>
+          </div>
         </div>
 
         {/* Prompt legend */}
@@ -573,9 +589,9 @@ function InspoVaultApp() {
         {/* FAB */}
         <button className="btn" onClick={() => setShowAdd(true)} style={{
           position:'fixed', bottom:28, right:24, width:62, height:62, borderRadius:'50%',
-          background:`linear-gradient(135deg,${C.accent},${C.accentDeep})`,
+          background:'linear-gradient(135deg, #E67A2E, #B85A18)',
           color:'#fff', fontSize:30, display:'flex', alignItems:'center', justifyContent:'center',
-          boxShadow:`0 4px 24px rgba(129,140,248,0.55)`,
+          boxShadow:'0 4px 24px rgba(230,122,46,0.55)',
         }}>+</button>
       </div>
 
@@ -597,7 +613,7 @@ function InspoVaultApp() {
               <>
                 <div style={{ display:'flex', gap:10, marginBottom:12 }}>
                   <input className="inp" placeholder="🔗  Paste any URL..." value={addUrl} onChange={e => setAddUrl(e.target.value)} onKeyDown={e => e.key==='Enter' && handleUrlFetch()} />
-                  <button className="btn btn-p" style={{ flexShrink:0, padding:'12px 18px', background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={handleUrlFetch} disabled={fetching||!addUrl.trim()}>
+                  <button className="btn btn-p" style={{ flexShrink:0, padding:'12px 18px', background:'linear-gradient(135deg, #E67A2E, #B85A18)' }} onClick={handleUrlFetch} disabled={fetching||!addUrl.trim()}>
                     {fetching ? '⏳' : 'Fetch 🔍'}
                   </button>
                 </div>
@@ -636,7 +652,7 @@ function InspoVaultApp() {
                     {saveErr && <p style={{ color:'#F87171', fontSize:13 }}>⚠️ {saveErr}</p>}
                     <div style={{ display:'flex', gap:10, marginTop:4 }}>
                       <button className="btn btn-g" style={{ flex:1 }} onClick={closeAdd}>Cancel</button>
-                      <button className="btn btn-p" style={{ flex:2, background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={handleUrlSave}>Save to Vault 💾</button>
+                      <button className="btn btn-p" style={{ flex:2, background:'linear-gradient(135deg, #E67A2E, #B85A18)' }} onClick={handleUrlSave}>Save to Vault 💾</button>
                     </div>
                   </div>
                 )}
@@ -680,7 +696,7 @@ function InspoVaultApp() {
                     </div>
 
                     {!analyzed && !analyzing && (
-                      <button className="btn btn-p" style={{ background:'linear-gradient(135deg,#A78BFA,#7C3AED)', borderRadius:12, padding:'14px' }} onClick={handleAnalyze}>
+                      <button className="btn btn-p" style={{ background:'linear-gradient(135deg, #E67A2E, #B85A18)', borderRadius:12, padding:'14px' }} onClick={handleAnalyze}>
                         🧠 Analyze with Claude Vision
                       </button>
                     )}
@@ -725,7 +741,7 @@ function InspoVaultApp() {
                         {saveErr && <p style={{ color:'#F87171', fontSize:13 }}>⚠️ {saveErr}</p>}
                         <div style={{ display:'flex', gap:10, marginTop:4 }}>
                           <button className="btn btn-g" style={{ flex:1 }} onClick={closeAdd}>Cancel</button>
-                          <button className="btn" style={{ flex:2, background:'linear-gradient(135deg,#A78BFA,#7C3AED)', color:'#fff', padding:'12px', borderRadius:12, fontSize:15, fontWeight:500, border:'none', cursor:'pointer' }} onClick={handleShotSave}>Save to Vault 💾</button>
+                          <button className="btn" style={{ flex:2, background:'linear-gradient(135deg, #E67A2E, #B85A18)', color:'#fff', padding:'12px', borderRadius:12, fontSize:15, fontWeight:500, border:'none', cursor:'pointer' }} onClick={handleShotSave}>Save to Vault 💾</button>
                         </div>
                       </div>
                     )}
@@ -850,7 +866,7 @@ function InspoVaultApp() {
                 <button className="btn btn-g" style={{ flex:1 }} onClick={() => openEdit(selected)}>✏️ Edit</button>
               </div>
               <div style={{ display:'flex', gap:10, marginBottom:12 }}>
-                <button className="btn btn-p" style={{ flex:1, background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={() => openChat(selected)}>
+                <button className="btn btn-p" style={{ flex:1, background:'linear-gradient(135deg, #E67A2E, #B85A18)' }} onClick={() => openChat(selected)}>
                   💬 {selected.prompt_text ? 'Chat & Use Prompt' : 'Chat About This'}
                 </button>
               </div>
@@ -941,7 +957,7 @@ function InspoVaultApp() {
 
             <div style={{ display:'flex', gap:10 }}>
               <button className="btn btn-g" style={{ flex:1 }} onClick={() => { setShowEdit(false); setShowDetail(true); }}>Cancel</button>
-              <button className="btn btn-p" style={{ flex:2, background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={handleEditSave} disabled={editLoad}>
+              <button className="btn btn-p" style={{ flex:2, background:'linear-gradient(135deg, #E67A2E, #B85A18)' }} onClick={handleEditSave} disabled={editLoad}>
                 {editLoad ? 'Saving... ⏳' : 'Save Changes 💾'}
               </button>
             </div>
@@ -991,7 +1007,7 @@ function InspoVaultApp() {
 
             <div style={{ padding:'12px 16px', borderTop:`1px solid ${C.border}`, display:'flex', gap:10, flexShrink:0 }}>
               <input className="inp" placeholder={selected.prompt_text ? 'Ask about this prompt... 🧠' : 'Ask anything... 💬'} value={chatIn} onChange={e => setChatIn(e.target.value)} onKeyDown={e => e.key==='Enter' && !e.shiftKey && sendChat()} style={{ flex:1 }} />
-              <button className="btn btn-p" style={{ flexShrink:0, padding:'12px 16px', background:`linear-gradient(135deg,${C.accent},${C.accentDeep})` }} onClick={sendChat} disabled={chatLoad||!chatIn.trim()}>➤</button>
+              <button className="btn btn-p" style={{ flexShrink:0, padding:'12px 16px', background:'linear-gradient(135deg, #E67A2E, #B85A18)' }} onClick={sendChat} disabled={chatLoad||!chatIn.trim()}>➤</button>
             </div>
           </div>
         </div>

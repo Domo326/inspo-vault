@@ -1,38 +1,58 @@
-// ─── Design tokens ────────────────────────────────────────────────────────────
+// ─── Design tokens — InspoVault Brand Palette ────────────────────────────────
 export const C = {
-  bg:'#070910', s1:'#0D1018', s2:'#131722', s3:'#1A2033',
-  accent:'#818CF8', accentDeep:'#4F46E5', cyan:'#67E8F9',
-  gold:'#FBBF24', green:'#34D399', purple:'#A78BFA', teal:'#2DD4BF',
-  text:'#F1F5F9', sub:'#94A3B8', muted:'#475569',
-  border:'rgba(255,255,255,0.07)',
+  // Core
+  bg:         '#0F0F0F',   // Black
+  s1:         '#080D1A',   // Deep card surface
+  s2:         '#0C1220',   // Elevated surface
+  s3:         '#10192E',   // Higher elevated / inputs
+  // Brand blues
+  accent:     '#0046FF',   // Electric Blue — ambient, tech, borders
+  accentDeep: '#001B87',   // Deep Space Blue — deep elements
+  // Signature orange
+  orange:     '#E67A2E',   // Signal Orange — primary actions, highlights
+  orangeDeep: '#B85A18',   // Deep orange
+  orangeGlow: 'rgba(230,122,46,0.2)',
+  blueGlow:   'rgba(0,70,255,0.15)',
+  // Neutrals
+  gray:       '#A8A8A8',   // Space Gray
+  text:       '#FFFFFF',   // White
+  sub:        '#A8A8A8',   // Space Gray for secondary text
+  muted:      '#4A5A7A',   // Muted blue-grey
+  border:     'rgba(0,70,255,0.2)',  // Blue border
+  // Mapped for backwards compat
+  cyan:       '#60B8FF',
+  green:      '#34D399',
+  gold:       '#E67A2E',   // gold → orange (used for stars)
+  purple:     '#0046FF',   // purple → blue (extracted prompts)
+  teal:       '#E67A2E',   // teal → orange (suggested prompts)
 };
 
 // prompt_type: "extracted" = verbatim | "suggested" = AI-generated from image
 export const PROMPT_STYLES = {
-  extracted: { emoji:'🧠', label:'Extracted Prompt',  color:'#A78BFA', bg:'rgba(167,139,250,0.12)', border:'rgba(167,139,250,0.25)', desc:'Copied directly from the screenshot' },
-  suggested: { emoji:'✨', label:'Suggested Prompt',  color:'#2DD4BF', bg:'rgba(45,212,191,0.10)',  border:'rgba(45,212,191,0.25)',  desc:'AI-generated based on what InspoVault saw — edit before using!' },
+  extracted: { emoji:'🧠', label:'Extracted Prompt',  color:'#0046FF', bg:'rgba(0,70,255,0.1)',   border:'rgba(0,70,255,0.3)',   desc:'Copied directly from the screenshot' },
+  suggested: { emoji:'✨', label:'Suggested Prompt',   color:'#E67A2E', bg:'rgba(230,122,46,0.1)', border:'rgba(230,122,46,0.3)', desc:'AI-generated based on what InspoVault saw — edit before using!' },
 };
 
 export const SOURCES = {
-  github:    { emoji:'🐙', label:'GitHub',     color:'#818CF8', bg:'rgba(129,140,248,0.12)' },
-  instagram: { emoji:'📸', label:'Instagram',  color:'#F472B6', bg:'rgba(244,114,182,0.12)' },
-  x:         { emoji:'🐦', label:'X/Twitter',  color:'#67E8F9', bg:'rgba(103,232,249,0.12)' },
-  facebook:  { emoji:'👤', label:'Facebook',   color:'#60A5FA', bg:'rgba(96,165,250,0.12)'  },
-  youtube:   { emoji:'📺', label:'YouTube',    color:'#F87171', bg:'rgba(248,113,113,0.12)' },
-  threads:   { emoji:'🧵', label:'Threads',    color:'#C084FC', bg:'rgba(192,132,252,0.12)' },
-  screenshot:{ emoji:'📷', label:'Screenshot', color:'#A78BFA', bg:'rgba(167,139,250,0.12)' },
-  other:     { emoji:'🌐', label:'Web',        color:'#34D399', bg:'rgba(52,211,153,0.12)'  },
+  github:    { emoji:'🐙', label:'GitHub',     color:'#0046FF', bg:'rgba(0,70,255,0.12)'   },
+  instagram: { emoji:'📸', label:'Instagram',  color:'#E67A2E', bg:'rgba(230,122,46,0.12)' },
+  x:         { emoji:'🐦', label:'X/Twitter',  color:'#60B8FF', bg:'rgba(96,184,255,0.12)' },
+  facebook:  { emoji:'👤', label:'Facebook',   color:'#4D8BFF', bg:'rgba(77,139,255,0.12)' },
+  youtube:   { emoji:'📺', label:'YouTube',    color:'#FF4444', bg:'rgba(255,68,68,0.12)'  },
+  threads:   { emoji:'🧵', label:'Threads',    color:'#A8A8A8', bg:'rgba(168,168,168,0.1)' },
+  screenshot:{ emoji:'📷', label:'Screenshot', color:'#E67A2E', bg:'rgba(230,122,46,0.12)' },
+  other:     { emoji:'🌐', label:'Web',        color:'#A8A8A8', bg:'rgba(168,168,168,0.1)' },
 };
 
 export const GRADIENTS = {
-  github:    'linear-gradient(135deg,#1e1b4b,#312e81)',
-  instagram: 'linear-gradient(135deg,#7c3aed,#db2777 50%,#ea580c)',
-  x:         'linear-gradient(135deg,#0c1a2e,#1e3a5f)',
-  facebook:  'linear-gradient(135deg,#1d4ed8,#1e40af)',
-  youtube:   'linear-gradient(135deg,#7f1d1d,#dc2626)',
-  threads:   'linear-gradient(135deg,#4c1d95,#7c3aed)',
-  screenshot:'linear-gradient(135deg,#312e81,#4c1d95)',
-  other:     'linear-gradient(135deg,#065f46,#0d9488)',
+  github:    'linear-gradient(135deg, #080D1A 0%, #001B87 100%)',
+  instagram: 'linear-gradient(135deg, #1A0800 0%, #8B3500 60%, #E67A2E 100%)',
+  x:         'linear-gradient(135deg, #080D1A 0%, #001B87 70%, #0046FF 100%)',
+  facebook:  'linear-gradient(135deg, #080D1A 0%, #001466 100%)',
+  youtube:   'linear-gradient(135deg, #1A0000 0%, #6B0000 100%)',
+  threads:   'linear-gradient(135deg, #0F0F0F 0%, #1E1E1E 100%)',
+  screenshot:'linear-gradient(135deg, #1A0800 0%, #7A2E00 100%)',
+  other:     'linear-gradient(135deg, #080D1A 0%, #001B87 100%)',
 };
 
 export const SORT_OPTIONS = [

@@ -4,7 +4,7 @@ export const metadata = {
   title:       'InspoVault',
   description: 'Your personal inspiration HQ — save links, screenshots, and AI prompts from anywhere',
   manifest:    '/manifest.json',
-  themeColor:  '#818CF8',
+  themeColor:  '#E67A2E',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'InspoVault' },
   viewport:    { width: 'device-width', initialScale: 1, maximumScale: 1, userScalable: false },
 };
@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#818CF8" />
+        <meta name="theme-color" content="#E67A2E" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="InspoVault" />
