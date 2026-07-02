@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getRequestUser, unauthorized } from '../../../lib/serverAuth';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -124,6 +125,9 @@ function extractDescription(html) {
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 export async function POST(req) {
+  const user = await getRequestUser(req);
+  if (!user) return unauthorized();
+
   const { url } = await req.json();
   const videoId = extractVideoId(url);
   if (!videoId) return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 });

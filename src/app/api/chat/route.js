@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
+import { getRequestUser, unauthorized } from '../../../lib/serverAuth';
 
 export async function POST(req) {
+  const user = await getRequestUser(req);
+  if (!user) return unauthorized();
+
   const { messages, entry } = await req.json();
 
   if (!messages?.length) return NextResponse.json({ error: 'No messages' }, { status: 400 });

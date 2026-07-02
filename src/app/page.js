@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  supabase, signIn, signUp, signOut, fetchEntries, insertEntry, incrementOpens, deleteEntry, updateEntry
+  supabase, signIn, signUp, signOut, fetchEntries, insertEntry, incrementOpens, deleteEntry, updateEntry, authHeaders
 } from '@/lib/supabase';
 import {
   C, PROMPT_STYLES, SOURCES, GRADIENTS, SORT_OPTIONS, ALL_FILTERS,
@@ -194,7 +194,7 @@ function InspoVaultApp() {
     try {
       const isYouTube = addUrl.includes('youtube.com') || addUrl.includes('youtu.be');
       const endpoint  = isYouTube ? '/api/youtube-meta' : '/api/fetch-meta';
-      const res  = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url: addUrl }) });
+      const res  = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json', ...(await authHeaders())}, body: JSON.stringify({ url: addUrl }) });
       const data = await res.json();
       setUrlMeta(data);
       setAddTitle(data.title || '');
@@ -236,7 +236,7 @@ function InspoVaultApp() {
     if (!imgB64 || !imgMime) return;
     setAnalyzing(true);
     try {
-      const res  = await fetch('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ base64Data: imgB64, mimeType: imgMime }) });
+      const res  = await fetch('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json', ...(await authHeaders())}, body: JSON.stringify({ base64Data: imgB64, mimeType: imgMime }) });
       const data = await res.json();
       setAnalyzed(data);
       setShotTitle(data.title || '');
@@ -299,7 +299,7 @@ function InspoVaultApp() {
     setMsgs(newMsgs); setChatLoad(true);
     try {
       const res  = await fetch('/api/chat', {
-        method: 'POST', headers: { 'Content-Type':'application/json' },
+        method: 'POST', headers: { 'Content-Type':'application/json', ...(await authHeaders()) },
         body: JSON.stringify({ messages: newMsgs, entry: selected }),
       });
       const data = await res.json();

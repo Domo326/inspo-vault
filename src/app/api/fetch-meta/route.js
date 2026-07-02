@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getRequestUser, unauthorized } from '../../../lib/serverAuth';
 
 function detectSource(hostname) {
   if (hostname === 'github.com')   return 'github';
@@ -31,6 +32,9 @@ function parseTitle(html) {
 }
 
 export async function POST(req) {
+  const user = await getRequestUser(req);
+  if (!user) return unauthorized();
+
   const { url } = await req.json();
   if (!url?.trim()) return NextResponse.json({ error: 'URL required' }, { status: 400 });
 

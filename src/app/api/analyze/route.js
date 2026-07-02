@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
+import { getRequestUser, unauthorized } from '../../../lib/serverAuth';
 
 export async function POST(req) {
+  const user = await getRequestUser(req);
+  if (!user) return unauthorized();
+
   const { base64Data, mimeType } = await req.json();
 
   if (!base64Data || !mimeType) {
